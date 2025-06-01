@@ -1,4 +1,4 @@
-# Napalm Brocade Fastiron
+# Napalm Ruckus ICX Fastiron
 
 Current methods supported
 =======
