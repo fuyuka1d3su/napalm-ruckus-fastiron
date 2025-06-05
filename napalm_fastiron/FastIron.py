@@ -1380,11 +1380,15 @@ class FastIronDriver(NetworkDriver):
                 port = result["remoteportdescription"]
             local_port = self.__standardize_interface_name(result["port"])
 
-            if local_port not in my_dict.keys():
-                my_dict[local_port] = []
-            my_dict[local_port].append(
+            fixed_local_port = re.sub(
+                "GigabitEthernet", "", re.sub("10GigabitEthernet", "", local_port)
+            )
+
+            if fixed_local_port not in my_dict.keys():
+                my_dict[fixed_local_port] = []
+            my_dict[fixed_local_port].append(
                 {
-                    "parent_interface": local_port,
+                    "parent_interface": fixed_local_port,
                     "remote_chassis_id": re.sub('"', "", result["remotechassisid"]),
                     "remote_port": re.sub('"', "", result["remoteportid"]),
                     "remote_port_description": re.sub(
