@@ -314,7 +314,7 @@ class FastIronDriver(NetworkDriver):
                 and "mgmt" not in interface["port"].lower()
             ):
                 ifnum = re.sub(r"^(?:\d+)?\D+([\d/]+)", "\\1", interface["port"])
-                result[ifnum] = interface["port"]
+                result[ifnum] = ifnum
 
         return result
 
