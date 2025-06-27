@@ -503,17 +503,25 @@ class FastIronDriver(NetworkDriver):
             chassis_string, "Power", 1
         )
         norm_stat = FastIronDriver.__retrieve_all_locations(chassis_string, "Power", 7)
-        capacity = (
-            float(FastIronDriver.__retrieve_all_locations(inline_string, "Free", -4)[0])
-            / 1000
-        )
-        pwr_used = (
-            capacity
-            - float(
-                FastIronDriver.__retrieve_all_locations(inline_string, "Free", 1)[0]
+        if len(inline_string) == 0:
+            capacity = float(0)
+            pwr_used = float(0)
+        else:
+            capacity = (
+                float(
+                    FastIronDriver.__retrieve_all_locations(inline_string, "Free", -4)[
+                        0
+                    ]
+                )
+                / 1000
             )
-            / 1000
-        )
+            pwr_used = (
+                capacity
+                - float(
+                    FastIronDriver.__retrieve_all_locations(inline_string, "Free", 1)[0]
+                )
+                / 1000
+            )
 
         my_dic = {}  # creates new list
         for val in range(0, len(status)):  # if power supply has failed will return
@@ -529,7 +537,6 @@ class FastIronDriver(NetworkDriver):
                     "capacity": capacity,
                     "output": pwr_used,
                 }
-
         return {"power": my_dic}  # returns dictionary containing pwr info
 
     @staticmethod
@@ -539,7 +546,7 @@ class FastIronDriver(NetworkDriver):
         my_dict = {}  # creates list
 
         if "Fanless" in string:
-            return {"fan": {None}}  # no fans are in unit and returns None
+            return {"fan": None}  # no fans are in unit and returns None
 
         for val in range(0, len(fan)):
             if fan[val] == "ok,":  # checks if output is failed or ok
@@ -1380,11 +1387,15 @@ class FastIronDriver(NetworkDriver):
                 port = result["remoteportdescription"]
             local_port = self.__standardize_interface_name(result["port"])
 
-            if local_port not in my_dict.keys():
-                my_dict[local_port] = []
-            my_dict[local_port].append(
+            fixed_local_port = re.sub(
+                "GigabitEthernet", "", re.sub("10GigabitEthernet", "", local_port)
+            )
+
+            if fixed_local_port not in my_dict.keys():
+                my_dict[fixed_local_port] = []
+            my_dict[fixed_local_port].append(
                 {
-                    "parent_interface": local_port,
+                    "parent_interface": fixed_local_port,
                     "remote_chassis_id": re.sub('"', "", result["remotechassisid"]),
                     "remote_port": re.sub('"', "", result["remoteportid"]),
                     "remote_port_description": re.sub(
