@@ -503,17 +503,25 @@ class FastIronDriver(NetworkDriver):
             chassis_string, "Power", 1
         )
         norm_stat = FastIronDriver.__retrieve_all_locations(chassis_string, "Power", 7)
-        capacity = (
-            float(FastIronDriver.__retrieve_all_locations(inline_string, "Free", -4)[0])
-            / 1000
-        )
-        pwr_used = (
-            capacity
-            - float(
-                FastIronDriver.__retrieve_all_locations(inline_string, "Free", 1)[0]
+        if len(inline_string) == 0:
+            capacity = float(0)
+            pwr_used = float(0)
+        else:
+            capacity = (
+                float(
+                    FastIronDriver.__retrieve_all_locations(inline_string, "Free", -4)[
+                        0
+                    ]
+                )
+                / 1000
             )
-            / 1000
-        )
+            pwr_used = (
+                capacity
+                - float(
+                    FastIronDriver.__retrieve_all_locations(inline_string, "Free", 1)[0]
+                )
+                / 1000
+            )
 
         my_dic = {}  # creates new list
         for val in range(0, len(status)):  # if power supply has failed will return
@@ -529,7 +537,6 @@ class FastIronDriver(NetworkDriver):
                     "capacity": capacity,
                     "output": pwr_used,
                 }
-
         return {"power": my_dic}  # returns dictionary containing pwr info
 
     @staticmethod
@@ -539,7 +546,7 @@ class FastIronDriver(NetworkDriver):
         my_dict = {}  # creates list
 
         if "Fanless" in string:
-            return {"fan": {None}}  # no fans are in unit and returns None
+            return {"fan": None}  # no fans are in unit and returns None
 
         for val in range(0, len(fan)):
             if fan[val] == "ok,":  # checks if output is failed or ok
